@@ -1,8 +1,9 @@
-package com.rincentral.test.services;
+package com.rincentral.test.services.impl;
 
 import com.rincentral.test.models.external.ExternalBrand;
 import com.rincentral.test.models.external.ExternalCar;
 import com.rincentral.test.models.external.ExternalCarInfo;
+import com.rincentral.test.services.api.ExternalCarsApiService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
@@ -16,14 +17,15 @@ import java.util.Collections;
 import java.util.List;
 
 @Service
-public class ExternalCarsApiService {
-    private static final Logger LOGGER = LogManager.getLogger(ExternalCarsApiService.class);
+public class ExternalCarsApiServiceImpl implements ExternalCarsApiService {
+    private static final Logger LOGGER = LogManager.getLogger(ExternalCarsApiServiceImpl.class);
 
     private static final String ALL_CARS_URL = "http://localhost:8084/api/v1/cars";
     private static final String CAR_BY_ID_URL = "http://localhost:8084/api/v1/cars/%d";
     private static final String ALL_BRANDS_URL = "http://localhost:8084/api/v1/brands";
     private final RestTemplate restTemplate = new RestTemplate();
 
+    @Override
     public List<ExternalCar> loadAllCars() {
         try {
             ResponseEntity<ExternalCar[]> allCarsResponse = restTemplate.getForEntity(ALL_CARS_URL, ExternalCar[].class);
@@ -37,6 +39,7 @@ public class ExternalCarsApiService {
         }
     }
 
+    @Override
     public ExternalCarInfo loadCarInformationById(int id) {
         String carUrl = String.format(CAR_BY_ID_URL, id);
         try {
@@ -51,6 +54,7 @@ public class ExternalCarsApiService {
         }
     }
 
+    @Override
     public List<ExternalBrand> loadAllBrands() {
         try {
             ResponseEntity<ExternalBrand[]> allBrandsResponse = restTemplate.getForEntity(ALL_BRANDS_URL, ExternalBrand[].class);
