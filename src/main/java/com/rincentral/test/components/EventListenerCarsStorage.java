@@ -6,7 +6,7 @@ import com.rincentral.test.models.EngineCharacteristics;
 import com.rincentral.test.models.external.ExternalBrand;
 import com.rincentral.test.models.external.ExternalCar;
 import com.rincentral.test.models.external.ExternalCarInfo;
-import com.rincentral.test.services.ExternalCarsApiService;
+import com.rincentral.test.services.api.ExternalCarsApiService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.ContextRefreshedEvent;
