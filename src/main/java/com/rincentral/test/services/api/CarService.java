@@ -8,5 +8,4 @@ import java.util.List;
 public interface CarService {
 
     List<? extends CarInfo> getCars(CarRequestParameters params);
-
 }

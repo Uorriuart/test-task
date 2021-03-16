@@ -7,7 +7,6 @@ import com.rincentral.test.services.api.CarService;
 import com.rincentral.test.services.api.SpeedService;
 import com.rincentral.test.services.api.TypeCarService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,27 +14,21 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.OptionalDouble;
 
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
 public class ApiController {
 
-    CarService service;
-    TypeCarService typesCarService;
-    SpeedService speedService;
-
-    @Autowired
-    public ApiController(CarService service, TypeCarService typesCarService, SpeedService speedService) {
-        this.service = service;
-        this.typesCarService = typesCarService;
-        this.speedService = speedService;
-    }
+    private final CarService service;
+    private final TypeCarService typesCarService;
+    private final SpeedService speedService;
 
     @GetMapping("/cars")
     public ResponseEntity<List<? extends CarInfo>> getCars(@Valid CarRequestParameters requestParameters) {
         List<? extends CarInfo> result = service.getCars(requestParameters);
-        return result.isEmpty()? ResponseEntity.notFound().build() : ResponseEntity.ok(service.getCars(requestParameters));
+        return result.isEmpty()? ResponseEntity.notFound().build() : ResponseEntity.ok(result);
     }
 
     @GetMapping("/fuel-types")
@@ -69,8 +62,8 @@ public class ApiController {
                 (requestParameters.getBrand() != null && requestParameters.getModel() != null)) {
             return ResponseEntity.badRequest().build();
         }
-        Double result = speedService.getAverageMaxSpeed(requestParameters);
+        OptionalDouble result = speedService.getAverageMaxSpeed(requestParameters);
 
-        return result.equals(-1.0)? ResponseEntity.notFound().build() : ResponseEntity.ok(speedService.getAverageMaxSpeed(requestParameters));
+        return result.isEmpty()?  ResponseEntity.notFound().build() : ResponseEntity.ok(result.getAsDouble());
     }
 }

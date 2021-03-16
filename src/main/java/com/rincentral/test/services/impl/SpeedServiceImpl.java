@@ -3,31 +3,29 @@ package com.rincentral.test.services.impl;
 import com.rincentral.test.models.CarFullInfo;
 import com.rincentral.test.models.params.MaxSpeedRequestParameters;
 import com.rincentral.test.services.api.SpeedService;
-import lombok.AllArgsConstructor;
+import com.rincentral.test.storages.Storage;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.OptionalDouble;
+import java.util.stream.Stream;
 
 @Service
-@AllArgsConstructor
 public class SpeedServiceImpl implements SpeedService {
-    private final List<CarFullInfo> carsStorage;
+    private final List<CarFullInfo> carsStorage = Storage.getCarsStorage();
 
     @Override
-    public double getAverageMaxSpeed(MaxSpeedRequestParameters requestParameters) {
-        OptionalDouble opDouble;
+    public OptionalDouble getAverageMaxSpeed(MaxSpeedRequestParameters requestParameters) {
+        Stream<CarFullInfo> filteredCarsStream;
+
         if (requestParameters.getModel() != null) {
-            opDouble = carsStorage.stream()
-                    .filter(it -> requestParameters.getModel().equals(it.getModel()))
-                    .mapToDouble(CarFullInfo::getMaxSpeed)
-                    .average();
+            filteredCarsStream = carsStorage.stream()
+                    .filter(it -> requestParameters.getModel().equals(it.getModel()));
         } else {
-            opDouble = carsStorage.stream()
-                    .filter(it -> requestParameters.getBrand().equals(it.getBrand()))
-                    .mapToDouble(CarFullInfo::getMaxSpeed)
-                    .average();
+            filteredCarsStream = carsStorage.stream()
+                    .filter(it -> requestParameters.getBrand().equals(it.getBrand()));
         }
-        return opDouble.orElse(-1.0);
+
+        return filteredCarsStream.mapToDouble(CarFullInfo::getMaxSpeed).average();
     }
 }

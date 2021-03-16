@@ -1,28 +1,30 @@
 package com.rincentral.test.services.impl;
 
+import com.rincentral.test.storages.Storage;
 import com.rincentral.test.models.CarFullInfo;
 import com.rincentral.test.models.CarInfo;
 import com.rincentral.test.models.params.CarRequestParameters;
 import com.rincentral.test.services.api.CarService;
-import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.Year;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 @Service
-@AllArgsConstructor
 public class CarServiceImpl implements CarService {
-    private final List<CarFullInfo> carsStorage;
+    private final List<CarFullInfo> carsStorage = Storage.getCarsStorage();
+    private static final String PRESENT = "present";
 
     @Override
     public List<? extends CarInfo> getCars(CarRequestParameters params) {
         List<CarFullInfo> cars = carsStorage.stream()
-                .filter(it -> params.getCountry() == null || params.getCountry().isBlank() ||
+                .filter(it -> isBlank(params.getCountry()) ||
                         it.getCountry().equals(params.getCountry()))
 
-                .filter(it -> params.getSegment() == null || params.getSegment().isBlank() ||
+                .filter(it -> isBlank(params.getSegment()) ||
                         it.getSegment().equals(params.getSegment()))
 
                 .filter(it -> params.getMinEngineDisplacement() == null ||
@@ -34,15 +36,16 @@ public class CarServiceImpl implements CarService {
                 .filter(it -> params.getMinMaxSpeed() == null ||
                         it.getMaxSpeed() >= params.getMinMaxSpeed())
 
-                .filter(it -> params.getSearch() == null || params.getSearch().isBlank() ||
+                .filter(it -> isBlank(params.getSearch()) ||
                         it.getModel().equals(params.getSearch()) ||
                         it.getGeneration().equals(params.getSearch()) ||
-                        it.getModification().equals(params.getCountry()))
+                        it.getModification().equals(params.getSearch()))
 
-                .filter(it -> params.getBodyStyle() == null || params.getBodyStyle().isBlank() ||
+                .filter(it -> isBlank(params.getBodyStyle()) ||
                         it.getBody().getBodyStyle().equals(params.getBodyStyle()))
 
-                .filter(it -> params.getYear() == null || isReleasedThisYear(it, params.getYear()))
+                .filter(it -> params.getYear() == null ||
+                        isReleasedThisYear(it, params.getYear()))
 
                 .collect(Collectors.toList());
 
@@ -57,7 +60,7 @@ public class CarServiceImpl implements CarService {
         int startYearRel = Integer.parseInt(releaseYearRange[0]);
         int endYearRel;
 
-        if (releaseYearRange[1].equals("present"))
+        if (releaseYearRange[1].equals(PRESENT))
             endYearRel = Year.now().getValue();
         else
             endYearRel = Integer.parseInt(releaseYearRange[1]);
