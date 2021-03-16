@@ -1,4 +1,4 @@
-package com.rincentral.test.components;
+package com.rincentral.test.storages;
 
 import com.rincentral.test.models.BodyCharacteristics;
 import com.rincentral.test.models.CarFullInfo;
@@ -8,23 +8,23 @@ import com.rincentral.test.models.external.ExternalCar;
 import com.rincentral.test.models.external.ExternalCarInfo;
 import com.rincentral.test.services.api.ExternalCarsApiService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
-public class EventListenerCarsStorage {
+public class Storage {
     private final ExternalCarsApiService service;
-    private final List<CarFullInfo> carFullInfoStorage;
+    private static final List<CarFullInfo> carsStorage = new ArrayList<>();
 
-    @EventListener
-    public void parseDataToStorage(ContextRefreshedEvent event) {
+    @EventListener(ApplicationReadyEvent.class)
+    public void initStorage() {
         List<ExternalCar> exCarsList = service.loadAllCars();
         Map<Integer, ExternalBrand> exBrandsMap = service.loadAllBrands().stream()
                 .collect(Collectors.toMap(ExternalBrand::getId, exBrand -> exBrand));
@@ -40,7 +40,7 @@ public class EventListenerCarsStorage {
             var body = getBodyCharacteristics(exCarInfo);
             var carFullInfo = getCarFullInfo(exCarInfo, brand, country, engine, body);
 
-            carFullInfoStorage.add(carFullInfo);
+            carsStorage.add(carFullInfo);
         });
     }
 
@@ -81,8 +81,7 @@ public class EventListenerCarsStorage {
                 .build();
     }
 
-    @Bean
-    public List<CarFullInfo> getCarFullInfoStorage() {
-        return carFullInfoStorage;
+    public static List<CarFullInfo> getCarsStorage() {
+        return carsStorage;
     }
 }
